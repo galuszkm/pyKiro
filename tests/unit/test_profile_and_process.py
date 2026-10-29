@@ -137,7 +137,7 @@ def test_child_env_keeps_parent_env_and_bypasses_proxy_for_loopback(monkeypatch)
 
     assert env["HTTPS_PROXY"] == "http://proxy:3128"
     assert env["EXTRA"] == "1"
-    assert env["KIRO_HOME"] == "/tmp/kh"
+    assert env["KIRO_HOME"] == str(Path("/tmp/kh"))
     assert env["NO_PROXY"] == "corp.example,localhost,127.0.0.1"
 
 
@@ -145,9 +145,9 @@ def test_find_executable_takes_the_explicit_path_then_path(tmp_path, monkeypatch
     exe = tmp_path / ("kiro-cli.exe" if sys.platform == "win32" else "kiro-cli")
     exe.write_text("#!/bin/sh\n")
     exe.chmod(0o755)
-    assert Path(find_executable(exe)) == exe
+    assert Path(find_executable(exe)).samefile(exe)
     monkeypatch.setenv("PATH", str(tmp_path))
-    assert Path(find_executable()).name == exe.name
+    assert Path(find_executable()).samefile(exe)  # Windows may report the extension as .EXE
     monkeypatch.setenv("PATH", "")
     with pytest.raises(KiroProcessError):
         find_executable()
