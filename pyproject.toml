@@ -1,6 +1,6 @@
 [project]
 name = "pykiro"
-version = "0.0.0"
+version = "0.1.0"
 description = "Use your Kiro subscription as an AI agent from Python, over the Agent Client Protocol"
 readme = "README.md"
 license = "Apache-2.0"
