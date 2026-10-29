@@ -1,0 +1,52 @@
+name: Bug report
+description: Something in pykiro doesn't work as documented
+title: "[BUG] "
+labels: ["bug", "triage"]
+body:
+  - type: input
+    id: pykiro-version
+    attributes:
+      label: pykiro version
+      placeholder: e.g. 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: kiro-version
+    attributes:
+      label: kiro-cli version
+      description: The output of `kiro-cli --version`.
+      placeholder: e.g. kiro-cli 2.34.0
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Python version and operating system
+      placeholder: e.g. Python 3.12.4 on Ubuntu 24.04
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Minimal code that reproduces it
+      description: >-
+        Remove anything private. Please don't paste a `pykiro.wire` log here: it holds your prompts, the replies and
+        account details. If a maintainer needs one, they'll ask you to share it privately.
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+      description: >-
+        Include the full traceback and, if kiro-cli failed, `client.stderr_tail()`. Both can hold paths, versions and
+        endpoints: read them and redact before posting.
+    validations:
+      required: true

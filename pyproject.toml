@@ -1,0 +1,115 @@
+[project]
+name = "pykiro"
+version = "0.0.0"
+description = "Use your Kiro subscription as an AI agent from Python, over the Agent Client Protocol"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Michal Galuszka", email = "michal.galuszka1@gmail.com" },
+]
+keywords = ["kiro", "agent", "acp", "agent-client-protocol", "mcp", "llm", "ai"]
+requires-python = ">=3.11,<3.15"
+dependencies = [
+    "agent-client-protocol>=0.12.1,<0.13",
+    "pydantic>=2.14,<3",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Framework :: AsyncIO",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://github.com/galuszkm/pyKiro"
+Documentation = "https://github.com/galuszkm/pyKiro/tree/main/docs"
+Issues = "https://github.com/galuszkm/pyKiro/issues"
+Changelog = "https://github.com/galuszkm/pyKiro/blob/main/CHANGELOG.md"
+
+[dependency-groups]
+dev = [
+    "anyio>=4.15",
+    "bandit>=1.9.4",
+    "commitizen>=4.19.2",
+    "httpx2>=2.16",
+    "hypothesis>=6.170.9",
+    "mcp>=2.3",
+    "pre-commit>=4.7.0",
+    "pytest>=9",
+    "pytest-cov>=7.1.0",
+    "pytest-timeout>=2.4",
+    "ruff>=0.17.2",
+    "rust-just>=1.59.0",
+    "ty>=0.0.91",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pykiro"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+    "E", "W", "F", "I", "B", "UP", "SIM", "ASYNC", "RUF",
+    "C4", "PIE", "RET", "PERF", "PTH", "G", "T20", "BLE",
+    "A", "N", "PT", "D"
+]
+ignore = [ "D105", "D107", "ASYNC240"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"  # also disables D203/D213/D401/D413 for you
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["pydantic.Field"]  # `param: str = Field(...)` is the documented app-tool idiom
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["D", "PT011"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+filterwarnings = ["error"]  # an unclosed pipe, transport or socket is a bug
+timeout = 60
+markers = [
+    "live: runs against the real kiro-cli and spends credits (set KIRO_LIVE_TESTS=1)",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["src/pykiro"]
+# The turn path needs Kiro to answer: the live tests (tests/live/) are its only coverage, by design (no fake Kiro)
+omit = ["src/pykiro/client.py", "src/pykiro/session.py"]
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+skip_covered = true
+
+[tool.bandit]
+targets = ["src/pykiro"]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version_provider = "pep621"
+version_files = ["pyproject.toml:^version"]
+tag_format = "v$version"
+update_changelog_on_bump = true
+changelog_file = "CHANGELOG.md"
+changelog_incremental = true
+major_version_zero = true

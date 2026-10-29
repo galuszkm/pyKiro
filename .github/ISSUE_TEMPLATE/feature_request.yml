@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest something pykiro should do
+title: "[FEATURE] "
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is hard or impossible today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API
+      description: Optional. How would the code look with this feature?
+      render: python
+  - type: textarea
+    id: kiro
+    attributes:
+      label: Kiro support
+      description: Optional. Which Kiro or ACP feature would this use, if you know?
