@@ -127,7 +127,7 @@ Credits spent: 0.0253
 Follow [Kiro's installation guide](https://kiro.dev/docs/getting-started/installation), then:
 
 ```bash
-kiro-cli --version     # tested with 2.34.0
+kiro-cli --version     # tested with 2.37.0
 kiro-cli login         # opens your browser; use --use-device-flow on a machine without one
 ```
 

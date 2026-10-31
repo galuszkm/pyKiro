@@ -15,7 +15,7 @@ body:
     attributes:
       label: kiro-cli version
       description: The output of `kiro-cli --version`.
-      placeholder: e.g. kiro-cli 2.34.0
+      placeholder: e.g. kiro-cli 2.37.0
     validations:
       required: true
   - type: input

@@ -78,7 +78,7 @@ class KiroClient:
             startup_timeout: Seconds to wait for ``initialize``.
             forbid_workspace_config: Refuse sessions whose cwd contains a ``.kiro`` entry (workspace agents,
                 skills, steering, MCP servers and hooks load in every profile, and Kiro's ACP server trusts every
-                workspace). Only the cwd itself is checked, not ``additional_directories`` or parent directories.
+                workspace). Only the cwd itself is checked, not its parent directories.
 
         Raises:
             TypeError: A tool can't be described to the agent.
@@ -288,7 +288,6 @@ class KiroClient:
         cwd: str | os.PathLike[str] | None,
         mode: str | None,
         mcp_servers: Sequence[Mapping[str, Any]],
-        additional_directories: Sequence[str | os.PathLike[str]],
         agent: dict[str, Any] | None,
     ) -> dict[str, Any]:
         """The ``session/new`` / ``session/load`` params, without the app's tool server."""
@@ -298,8 +297,6 @@ class KiroClient:
         if self._forbid_workspace_config and (path / ".kiro").exists():
             raise ValueError(f"{path / '.kiro'} exists and forbid_workspace_config is set")
         params: dict[str, Any] = {"cwd": str(path), "mcpServers": list(mcp_servers)}
-        if additional_directories:
-            params["additionalDirectories"] = [str(Path(d).resolve()) for d in additional_directories]
         if agent is not None:  # without the modeId, Kiro registers the agent but doesn't select it
             params["_meta"] = {"kiro": {"modeId": agent["id"], "customAgents": [agent]}}
         elif mode is not None:
@@ -336,7 +333,6 @@ class KiroClient:
         tools: Sequence[Callable[..., Any]] | None = None,
         result_type: type[BaseModel] | None = None,
         mcp_servers: Sequence[Mapping[str, Any]] = (),
-        additional_directories: Sequence[str | os.PathLike[str]] = (),
     ) -> Session:
         """Create a session.
 
@@ -365,7 +361,6 @@ class KiroClient:
                 errors and can submit again), or None when the turn was cancelled or refused.
             mcp_servers: Standalone MCP server definitions in ACP form, forwarded unchanged. While the session
                 has app tools or a ``result_type``, the name ``app`` is reserved.
-            additional_directories: Extra workspace roots: the agent reads there without asking, like in ``cwd``.
 
         Raises:
             ValueError: Invalid cwd, mode, model or effort, or an MCP server named ``app``.
@@ -374,7 +369,7 @@ class KiroClient:
         if mode is not None and (system is not None or kiro_tools is not None or allow or deny):
             raise ValueError("pass mode= or the agent settings (system, kiro_tools, allow, deny), not both")
         agent = agent_definition(system, kiro_tools, allow, deny)
-        params = self._session_params(cwd, mode, mcp_servers, additional_directories, agent)
+        params = self._session_params(cwd, mode, mcp_servers, agent)
         binding = await self._bind_tools(tools, result_type, mcp_servers)
         if binding is not None:
             params["mcpServers"].insert(0, binding.mcp_server())
@@ -426,7 +421,6 @@ class KiroClient:
         tools: Sequence[Callable[..., Any]] | None = None,
         result_type: type[BaseModel] | None = None,
         mcp_servers: Sequence[Mapping[str, Any]] = (),
-        additional_directories: Sequence[str | os.PathLike[str]] = (),
     ) -> Session:
         """Load a stored session; its replayed history is in ``session.history``.
 
@@ -453,7 +447,7 @@ class KiroClient:
             if session_id not in {s.session_id for s in await self.list_sessions()}:
                 raise ValueError(f"no stored session {session_id} in this profile")
             agent = agent_definition(system, kiro_tools, allow, deny)
-            params = self._session_params(cwd, None, mcp_servers, additional_directories, agent)
+            params = self._session_params(cwd, None, mcp_servers, agent)
             binding = await self._bind_tools(tools, result_type, mcp_servers)
             if binding is not None:
                 params["mcpServers"].insert(0, binding.mcp_server())

@@ -67,7 +67,7 @@ Credits spent: 0.0097
 ### Setting things up (once)
 
 **1. Install Kiro CLI.** Follow [Kiro's installation guide](https://kiro.dev/docs/getting-started/installation/#cli).
-These docs were tested with **kiro-cli 2.34.0**. Check yours with `kiro-cli --version`, and pyKiro's with
+pyKiro is tested with **kiro-cli 2.37.0**. Check yours with `kiro-cli --version`, and pyKiro's with
 `pykiro.__version__`.
 
 **2. Log in.** Run `kiro-cli login` and follow the browser prompts. No browser on that machine? Use

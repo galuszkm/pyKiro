@@ -20,8 +20,8 @@ and the gotchas.
   makes the *setup* repeatable, not the model's words.
 - **Models depend on your account.** If `claude-haiku-5.5` isn't on your list, pick another one
   ([chapter 05](05_Models_and_Credits.md)).
-- **Where it was tested:** Linux, Python 3.13, kiro-cli 2.34.0. Kiro can change between versions, so when a chapter
-  describes something Kiro does that pyKiro can't promise, it says "observed on kiro-cli 2.34.0".
+- **Where it was tested:** Linux, Python 3.13, kiro-cli 2.37.0. Kiro can change between versions, so when a chapter
+  describes something Kiro does that pyKiro can't promise, it says which kiro-cli version it was observed on.
 - **Clean by default:** unless a chapter says otherwise, the agent works in an empty temporary folder with a clean,
   isolated Kiro configuration, so it doesn't touch your projects or your own `~/.kiro`.
 

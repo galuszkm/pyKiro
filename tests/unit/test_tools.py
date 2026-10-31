@@ -290,6 +290,7 @@ async def test_structured_result_is_validated_and_reset_per_turn():
 
     assert invalid["isError"] is True  # the agent sees why and can correct it
     assert binding.output("end_turn") == Verdict(label="spam", score=9)
+    assert binding.output("cancelled") is None
     binding.prompt_blocks([])  # the next turn
     assert binding.output("cancelled") is None
     with pytest.raises(KiroError, match="Verdict"):

@@ -94,8 +94,7 @@ an offline one:
 - Lifecycle: close stops the process group quickly, is shared by concurrent callers and finishes when a caller is
   cancelled, a crash mid-turn fails the turn, close cancels running turns.
 - Load with history in a new process, one load of an id at a time; agent settings (system prompt, allow/deny);
-  model and effort validated against the advertised options; an unknown mode is an error; an additional directory
-  is read without asking, like the cwd (outside both, a read asks).
+  model and effort validated against the advertised options; an unknown mode is an error.
 
 ## What NOT to Test
 

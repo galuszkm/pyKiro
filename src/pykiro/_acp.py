@@ -29,7 +29,6 @@ _REQUIRED_FLAGS = (
 _REQUIRED_OBJECTS = (
     ("sessionCapabilities", "list"),
     ("sessionCapabilities", "delete"),
-    ("sessionCapabilities", "additionalDirectories"),
     ("sessionCapabilities", "close"),
 )
 

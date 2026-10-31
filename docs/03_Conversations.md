@@ -112,8 +112,7 @@ with tempfile.TemporaryDirectory() as workspace:
 
 Every session has a **working directory** (`cwd`), the folder the agent works in. A `KiroClient` defaults to the
 folder you started your script from, so the agent could read your project files, and a `.kiro` folder there would
-load. For a chat about plant names we don't want that, so we use an empty temporary folder. Need more than one
-folder? `new_session(additional_directories=[...])` adds more, and the agent reads them as freely as the `cwd`.
+load. For a chat about plant names we don't want that, so we use an empty temporary folder.
 
 ### Start, chat, close
 

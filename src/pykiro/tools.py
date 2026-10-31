@@ -236,7 +236,9 @@ class ToolBinding:
         Raises:
             KiroError: A result was expected and the agent submitted no valid one.
         """
-        if self.result_type is None or self.submitted is not None or stop_reason in ("cancelled", "refusal"):
+        if self.result_type is None or stop_reason in ("cancelled", "refusal"):
+            return None
+        if self.submitted is not None:
             return self.submitted
         raise KiroError(
             f"the agent did not submit a valid {self.result_type.__name__}; "

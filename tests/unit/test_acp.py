@@ -15,12 +15,7 @@ def initialized() -> dict:
             "loadSession": True,
             "promptCapabilities": {"image": True, "embeddedContext": True},
             "mcpCapabilities": {"http": True},
-            "sessionCapabilities": {
-                "list": {},
-                "delete": {},
-                "additionalDirectories": {},
-                "close": {},
-            },
+            "sessionCapabilities": {"list": {}, "delete": {}, "close": {}},
         },
     }
 
@@ -44,7 +39,6 @@ def test_initialize_rejects_a_malformed_or_unsupported_response(response):
         ("mcpCapabilities", "http"),
         ("sessionCapabilities", "list"),
         ("sessionCapabilities", "delete"),
-        ("sessionCapabilities", "additionalDirectories"),
         ("sessionCapabilities", "close"),
     ],
     ids=lambda path: ".".join(path),

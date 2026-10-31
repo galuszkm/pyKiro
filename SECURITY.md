@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-pyKiro has no release yet; fixes land on `main`. Once releases exist, only the latest one receives fixes.
+Only the latest release receives security fixes.
 
 ## Reporting a vulnerability
 

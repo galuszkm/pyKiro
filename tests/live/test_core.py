@@ -293,27 +293,6 @@ async def test_two_concurrent_sessions(model, effort, tmp_path):
     assert "BETA" in rb.text
 
 
-async def test_an_additional_directory_is_read_like_the_workspace(model, effort, tmp_path):
-    workspace, extra = tmp_path / "workspace", tmp_path / "extra"
-    workspace.mkdir()
-    extra.mkdir()
-    (extra / "marker.txt").write_text("PLUM-58\n")
-    prompt = f"Read the file {extra / 'marker.txt'} and reply with its content only."
-    outside: list[PermissionRequest] = []
-    added: list[PermissionRequest] = []
-    async with KiroClient(cwd=workspace) as client:
-        plain = await client.new_session(model=model, effort=effort, policy=recording(outside))
-        await plain.send(prompt)
-        session = await client.new_session(
-            model=model, effort=effort, policy=recording(added), additional_directories=[extra]
-        )
-        result = await session.send(prompt)
-
-    assert [r.capability for r in outside] == ["fs_read"]  # outside the workspace a read asks
-    assert added == []  # an additional directory is read without asking, like the cwd
-    assert "PLUM-58" in result.text.upper()
-
-
 async def test_closed_session_is_still_listed(tmp_path):
     async with KiroClient(cwd=tmp_path) as client:
         async with await client.new_session() as session:
