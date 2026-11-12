@@ -11,7 +11,7 @@ authors = [
 keywords = ["kiro", "agent", "acp", "agent-client-protocol", "mcp", "llm", "ai"]
 requires-python = ">=3.11,<3.15"
 dependencies = [
-    "agent-client-protocol>=0.12.1,<0.13",
+    "agent-client-protocol>=0.12.1,<1.1",
     "pydantic>=2.14,<3",
 ]
 classifiers = [
