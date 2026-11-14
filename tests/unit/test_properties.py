@@ -36,7 +36,6 @@ kiro_meta = st.fixed_dictionaries(
         "replay": json_values,
         "elapsedTime": json_values,
         "usagePercentage": json_values,
-        "failureReason": json_values,
         "promptTurnSummaries": st.lists(
             st.fixed_dictionaries({}, optional={"usage": json_values, "unit": st.sampled_from(["credit", "token"])}),
             max_size=3,
@@ -81,7 +80,6 @@ FIELD_TYPES: dict[type, dict[str, tuple[type, ...]]] = {
         "kind": (str, type(None)),
         "status": (str, type(None)),
         "text": (str,),
-        "failure_reason": (str, type(None)),
     },
     Notice: {"method": (str,), "kind": (str, type(None)), "detail": (str, type(None)), "text": (str, type(None))},
 }

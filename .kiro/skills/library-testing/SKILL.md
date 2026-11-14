@@ -75,7 +75,7 @@ tests/
 - Tools: schema from the signature (`Field`/`Annotated` descriptions), the docstring as description, validation
   errors and `ToolError` messages as tool errors, other exceptions only as a generic failure, threads, results,
   self-approval only when consent *and* identity match exactly, `submit_result`, the reserved `app` name.
-- Agent definitions, profile homes, env, executable lookup, start-up errors (login message, exit code, stderr).
+- Agent definitions, profile homes, env, executable lookup, start-up errors (exit code, stderr).
 - The renderer's transcript, including dropped terminal control characters.
 - The docs: every fragment a chapter quotes appears, in order, in its full program (ruff reformats any block that
   parses, so a half-statement can turn into other code); a standalone snippet says "variation" before it.
@@ -91,6 +91,8 @@ an offline one:
   early cancels the turn and the session continues.
 - Permissions reach the policy with Kiro's consent context; the app's own tools are self-approved; a cancel answers
   a pending ask `cancelled` without waiting for the policy, and its late allow is not used.
+- Start-up: a signed-out kiro-cli (a throwaway HOME without its credentials, no credits) is the login error; a
+  model list that arrives after `session/new` (a local proxy delays Kiro's first connections) is waited for.
 - Lifecycle: close stops the process group quickly, is shared by concurrent callers and finishes when a caller is
   cancelled, a crash mid-turn fails the turn, close cancels running turns.
 - Load with history in a new process, one load of an id at a time; agent settings (system prompt, allow/deny);
@@ -111,6 +113,10 @@ an offline one:
 - Async tests: `pytestmark = pytest.mark.anyio` (anyio's pytest plugin; the backend is asyncio).
 - `pytest.raises(SpecificError)`; parametrize equivalent cases with readable `ids`.
 - Filesystem via `tmp_path`, environment via `monkeypatch`.
+- Live tests run on 6 workers (`just test-live` passes `-n 6` to pytest-xdist; `-n 0` runs them one by one). A live
+  test owns its client, cwd (`tmp_path`) and files and shares nothing with another test. Starting Kiro is most of a
+  live test's time: related facts share one client, with a session each, and run their turns concurrently
+  (`asyncio.gather`) rather than starting Kiro again.
 - Live tests: the `model` and `effort` fixtures (`KIRO_LIVE_MODEL`, default `claude-haiku-5.5`; `KIRO_LIVE_EFFORT`,
   default `low`) on every session that sets a model, tiny prompts, an isolated
   profile unless the fact is about `Inherit()`. They may list file names under `~/.kiro` but never read Kiro's

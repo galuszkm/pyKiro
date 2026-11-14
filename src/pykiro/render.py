@@ -90,7 +90,7 @@ class AnsiRenderer:
         if event.status == "completed":
             self._line(f"{self._paint(GREEN, '✓')} {title}")
         elif event.status == "failed":
-            reason = _one_line(event.failure_reason or event.text)
+            reason = _one_line(event.text)
             self._line(f"{self._paint(RED, '✗')} {title}  {self._paint(DIM, reason)}")
 
     def _result(self, result: TurnResult) -> None:

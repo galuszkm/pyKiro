@@ -176,8 +176,8 @@ not an `async def`. Chapter 04 shows how to handle events yourself.
 ## Gotchas, side effects and risks
 
 - **The default `cwd` is your current folder.** The agent can read it. Pick the folder on purpose.
-- **Close sessions you're done with.** Observed on kiro-cli 2.34.0: every open session makes creating the next one
-  slower.
+- **Close sessions you're done with.** An open session holds memory in Kiro until the client closes; `async with`
+  releases it as soon as you're done.
 - **Don't create a client per message.** Starting Kiro takes seconds. Start once, reuse it.
 - **Await your turns before closing.** Closing the client mid-turn cancels the turn.
 

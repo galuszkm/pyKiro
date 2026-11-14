@@ -13,7 +13,7 @@ from types import TracebackType
 from typing import TYPE_CHECKING, Any, Self
 
 from .content import PromptContent, to_blocks
-from .errors import KiroProtocolError
+from .errors import KiroError, KiroProtocolError
 from .events import Event, Notice, TextDelta, ToolCall, TurnResult, context_usage, normalize_update, turn_usage
 from .permissions import CANCELLED, PermissionPolicy, PermissionRequest, answer_for, decide
 
@@ -22,6 +22,10 @@ if TYPE_CHECKING:
     from .tools import ToolBinding
 
 logger = logging.getLogger(__name__)
+
+# Seconds a session waits for Kiro to advertise its models before model= or effort= is checked; Kiro's own fetch
+# of the model list times out after 30 s (kiro-cli 3.3.0).
+MODEL_LIST_TIMEOUT = 30.0
 
 
 def _mapping(value: Any) -> Mapping[str, Any]:
@@ -136,6 +140,7 @@ class Session:
         self._turn_lock = asyncio.Lock()
         self._loading = False
         self._tool_inputs: dict[str, Any] = {}  # Kiro's permission requests omit rawInput; the tool_call has it
+        self._options_changed = asyncio.Event()  # set when Kiro re-advertises the config options
         self._closed = False
 
     def __repr__(self) -> str:
@@ -172,6 +177,26 @@ class Session:
 
     def _current(self, option_id: str) -> Any:
         return next((o.current for o in self.config_options if o.id == option_id), None)
+
+    async def _wait_for_models(self) -> None:
+        """Wait until Kiro advertises the model option.
+
+        Until Kiro's model list has loaded, a session has no model option; Kiro sends it in a
+        ``config_option_update`` once the list arrives.
+
+        Raises:
+            KiroError: No model list arrived within MODEL_LIST_TIMEOUT seconds.
+        """
+        try:
+            async with asyncio.timeout(MODEL_LIST_TIMEOUT):
+                while all(o.id != "model" for o in self.config_options):
+                    self._options_changed.clear()
+                    await self._options_changed.wait()
+        except TimeoutError:
+            raise KiroError(
+                f"Kiro listed no models within {MODEL_LIST_TIMEOUT:.0f} s: check the network, and that KIRO_API_KEY "
+                "is unset or valid (it takes priority over the login)"
+            ) from None
 
     async def _set_option(self, option_id: str, value: str) -> None:
         """Set an advertised option to one of its advertised values (Kiro itself doesn't validate them)."""
@@ -284,8 +309,8 @@ class Session:
     async def close(self) -> None:
         """Cancel the running turn and release the session in Kiro; it stays stored and loadable.
 
-        Use ``async with`` (or call this) for sessions that end before the client does: on kiro-cli 2.34.0 every
-        open session was observed to slow session creation on its client. Closing the client closes them all.
+        Use ``async with`` (or call this) for sessions that end before the client does, so Kiro and the app's tool
+        server stop holding them. Closing the client closes them all.
         """
         if self._closed:
             return
@@ -343,6 +368,7 @@ class Session:
         # mode/model/effort current.
         if update.get("sessionUpdate") == "config_option_update" and isinstance(update.get("configOptions"), list):
             self.config_options = parse_config_options(update["configOptions"])
+            self._options_changed.set()
         self._dispatch(event)
 
     def _on_notice(self, method: str, params: Mapping[str, Any]) -> None:

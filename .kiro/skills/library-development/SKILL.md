@@ -95,7 +95,7 @@ public API:  __init__.py
   `SessionInfo.from_raw` leave out entries without a string id, so they never raise. Unknown kinds become `Notice`
   events; every event keeps its `raw` payload. No Pydantic models or enums for Kiro's messages.
 - **Launch the way Kiro documents for ACP clients:** `kiro-cli acp --agent-engine=v3 --auth-method=cli`. `cli`
-  (the default on kiro-cli 2.34.0) takes the engine's tokens from kiro-cli's own credential store; `client` would
+  (the default, per `kiro-cli acp --help` on 3.3.0) takes the engine's tokens from kiro-cli's own credential store; `client` would
   send the engine's token requests to us, and we answer those -32601.
 - **Never invent permission options**; answer with an offered option id, falling back to `reject_once`, then
   `cancelled`.
@@ -103,10 +103,12 @@ public API:  __init__.py
   with JSON-RPC -32603 ("This operation was aborted") instead of a `cancelled` stop reason; `stream()` reports a
   turn it cancelled as `cancelled` either way (live test `test_closing_the_client_cancels_running_turns`).
 - **Validate config values against what the session advertises** (`Session._set_option`, at session creation) —
-  Kiro doesn't.
+  Kiro doesn't. Kiro answers `session/new` (after waiting about 10 s) without a `model` option when its model list
+  hasn't loaded, and sends the option later in a `config_option_update`; with `model=` or `effort=` the session
+  waits for it, up to `MODEL_LIST_TIMEOUT` (live test `test_a_model_list_that_arrives_after_session_new_is_waited_for`).
 - **The process runs in its own process group**, and escalation signals the group. Signalling the group stops
-  kiro-cli and kiro-cli-chat; the Node.js engine (`acp-server.js`) runs in its own group and exits on its own once
-  they are gone (within 1 s, measured on kiro-cli 2.34.0). `close()` gives kiro-cli one second to exit, then
+  kiro-cli; the Node.js engine (`acp-server.js`) runs in its own group and exits on its own once kiro-cli is gone
+  (at once, measured on kiro-cli 3.3.0). `close()` gives kiro-cli one second to exit, then
   terminates the group (on Windows: a forced `taskkill /T`) instead of waiting for the V3 engine's 5 s exit, and
   stored sessions still load afterwards (live tests `test_streaming_then_close_stops_the_whole_process_group_quickly`,
   `test_load_in_a_new_process`).
@@ -132,7 +134,9 @@ public API:  __init__.py
 - Comments only for the non-obvious (a Kiro quirk, a protocol rule, a reason). Never narrate the code.
 - Early returns; nesting ≤ 3 levels; small functions with one job.
 - Kiro-side failures raise `KiroError` or one of its two subclasses: `KiroProcessError` (kiro-cli missing, not
-  logged in, exited) and `KiroProtocolError` (a JSON-RPC error). Misuse raises the builtin that fits: `ValueError`
+  logged in, exited) and `KiroProtocolError` (a JSON-RPC error). Signed out, kiro-cli answers `initialize` without
+  capabilities and refuses every other request with ACP's auth_required (-32000); `start()` turns that into the
+  login error (live test `test_a_signed_out_kiro_cli_is_a_login_error`). Misuse raises the builtin that fits: `ValueError`
   for a bad value, `TypeError` for a wrong type, `RuntimeError` for a call in the wrong state. Message: what is
   wrong, then the valid choices. Chain with `from exc`, or `from None` for noise. The one other public exception
   is `ToolError`, which an app tool raises to give the agent a message; no further hierarchy.

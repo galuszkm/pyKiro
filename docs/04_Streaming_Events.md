@@ -18,7 +18,7 @@ time as they arrive. `send()` from chapter 03 is the same loop, run for you. Eve
 | Event | When you get it | Main fields |
 |---|---|---|
 | `TextDelta` | A chunk of the reply | `text` |
-| `ToolCall` | A tool call starts, then every time it changes | `tool_call_id`, `title`, `status`, `raw_input`, `failure_reason` |
+| `ToolCall` | A tool call starts, then every time it changes | `tool_call_id`, `title`, `status`, `raw_input`, `text` |
 | `Notice` | Everything else Kiro tells us | `method`, `kind`, `detail`, `text` |
 | `TurnResult` | The turn is over. Always the last event. | `stop_reason`, `text`, `credits`, `elapsed_ms` |
 
@@ -149,7 +149,7 @@ elif isinstance(event, ToolCall) and event.status == "completed":
 ```
 
 A tool call is a little story told over several events: first "starting" (`pending`), then updates (`in_progress`,
-then `completed`, or `failed` with a `failure_reason`). They all share one `tool_call_id`. An update only carries
+then `completed`, or `failed` with the reason in `text`). They all share one `tool_call_id`. An update only carries
 what changed, so fields like `title` can be `None` on later events. In the sample, both reads started before either
 finished: several calls can be in flight at once.
 

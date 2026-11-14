@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 
 from pykiro import Image, Isolated, KiroProcessError, Resource
-from pykiro._process import StderrBuffer, build_env, find_executable, startup_error
+from pykiro._process import StderrBuffer, build_env, find_executable
 from pykiro.content import to_blocks
 from pykiro.profile import ProfileHome, agent_definition, validate_home
 
@@ -173,17 +173,6 @@ def test_a_stderr_tail_of_zero_lines_is_empty():
     assert stderr.tail(1) == "b\n"
     assert stderr.tail(0) == ""
     assert stderr.tail(-1) == ""
-
-
-def test_startup_failure_explains_a_missing_login_and_keeps_stderr():
-    logged_out, broken = StderrBuffer(), StderrBuffer()
-    logged_out.lines.append("error: You are not logged in, please log in with kiro-cli login\n")
-    broken.lines.append("panic\n")
-
-    assert "kiro-cli login" in str(startup_error(1, logged_out))
-    error = startup_error(101, broken)
-    assert error.exit_code == 101
-    assert "panic" in error.stderr_tail
 
 
 def test_prompt_content_blocks():

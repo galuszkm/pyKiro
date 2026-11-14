@@ -149,7 +149,7 @@ how to list the modes. `mode=` and the four settings don't mix: together they ra
   nothing, and a typo in `deny` denies nothing. Test once that your agent really lacks what you took away.
 - **A narrow `kiro_tools` hides MCP servers.** Name them, like `"@time"` for a server called `time`
   ([chapter 12](12_MCP_Servers.md)).
-- **Sessions with agent settings run their turns one after another.** Observed on kiro-cli 2.34.0: default sessions
+- **Sessions with agent settings run their turns one after another.** Observed on kiro-cli 3.3.0: default sessions
   overlapped, custom-agent sessions didn't.
 
 ## Where to next

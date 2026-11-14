@@ -4,7 +4,7 @@
 
 **Kiro's agent harness, inside your Python code.**
 
-[![Python 3.11–3.14](https://img.shields.io/badge/python-3.11%E2%80%933.14-blue)](pyproject.toml)
+[![Python 3.11–3.15](https://img.shields.io/badge/python-3.11%E2%80%933.15-blue)](pyproject.toml)
 [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-green)](LICENSE)
 [![Status: alpha](https://img.shields.io/badge/status-alpha-orange)](CHANGELOG.md)
 
@@ -121,13 +121,13 @@ Credits spent: 0.0253
 
 ## Getting started
 
-**1. What you need:** Python 3.11–3.14 and a Kiro account. pyKiro is tested on Linux with each supported Python version.
+**1. What you need:** Python 3.11–3.15 and a Kiro account. pyKiro is tested on Linux with each supported Python version.
 
 **2. Install Kiro CLI and log in.** pyKiro needs a Kiro CLI with the [V3 engine](https://kiro.dev/docs/cli/v3/).
 Follow [Kiro's installation guide](https://kiro.dev/docs/getting-started/installation), then:
 
 ```bash
-kiro-cli --version     # tested with 2.37.0
+kiro-cli --version     # tested with 3.3.0
 kiro-cli login         # opens your browser; use --use-device-flow on a machine without one
 ```
 
@@ -178,7 +178,7 @@ you can copy and run.
 
 ## Developer setup
 
-Want to work on pyKiro itself? You need Python 3.11–3.14, uv and git. Kiro CLI is needed only for the live tests.
+Want to work on pyKiro itself? You need Python 3.11–3.15, uv and git. Kiro CLI is needed only for the live tests.
 
 ```bash
 git clone https://github.com/galuszkm/pyKiro.git

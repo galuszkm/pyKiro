@@ -325,8 +325,8 @@ API key in `KIRO_API_KEY` instead. You create the key in your Kiro account, on a
 it in your CI's secret store, and credits used with it come from your subscription.
 
 What we tested: the script for real on Linux with a normal login, and the workflow with a YAML parser and
-`actionlint`. We did **not** run it on GitHub or with a valid API key. Observed on kiro-cli 2.34.0: a made-up
-`KIRO_API_KEY` broke pyKiro even with a working login on the machine (`option 'model' is not advertised`, exit code
+`actionlint`. We did **not** run it on GitHub or with a valid API key. Observed on kiro-cli 3.3.0: a made-up
+`KIRO_API_KEY` broke pyKiro even with a working login on the machine (`Kiro listed no models within 30 s`, exit code
 2). So make sure `KIRO_API_KEY` is either unset or valid wherever you run pyKiro.
 
 ## Gotchas, side effects and risks
@@ -334,8 +334,9 @@ What we tested: the script for real on Linux with a normal login, and the workfl
 - **A pull request can change the workflow.** With `pull_request`, GitHub runs the workflow file from the branch, so
   anyone who can push a branch can print the secret. Limit write access. Never "fix" forks with `pull_request_target`
   plus a checkout of their code.
-- **You can't pin kiro-cli's version.** Kiro ships the latest release only. The "Show the kiro-cli version" step makes
-  drift visible in every run.
+- **The installer takes the latest kiro-cli.** For repeatable runs, pin one:
+  `curl -fsSL https://cli.kiro.dev/install | bash -s -- --version 3.3.0`. The "Show the kiro-cli version" step shows
+  what each run used.
 - **No wire log in CI.** The `pykiro.wire` logger records prompts and replies, and here the prompt is the diff.
 - **Every push is a review, and a review costs credits.** GitHub's `concurrency` setting can cancel older runs of the
   same pull request.

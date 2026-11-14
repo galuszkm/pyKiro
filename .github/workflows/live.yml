@@ -1,0 +1,55 @@
+# Live tests against the latest kiro-cli release (never pinned: they check that pyKiro works with what users get),
+# logged in with the KIRO_API_KEY secret. They spend credits, so they run only for pull requests into main,
+# pushes to main, and manual runs.
+name: Live tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: live-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: Check for the API key
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - id: check
+        env:
+          HAS_KEY: ${{ secrets.KIRO_API_KEY != '' }}
+        run: echo "enabled=$HAS_KEY" >> "$GITHUB_OUTPUT"
+
+  live:
+    name: Live tests (kiro-cli)
+    needs: gate
+    # Pull requests from forks and from Dependabot get no repository secrets: the job is skipped, not failed
+    if: needs.gate.outputs.enabled == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v10.3.3
+        with:
+          enable-cache: true
+      - name: Install the latest kiro-cli
+        run: |
+          curl -fsSL https://cli.kiro.dev/install | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - run: kiro-cli --version
+      - name: Live tests
+        env:
+          KIRO_API_KEY: ${{ secrets.KIRO_API_KEY }}
+        # A failed test's captured logs can hold the wire log (account and org details); this repo's logs are public
+        run: uv run --locked just test-live --show-capture=no

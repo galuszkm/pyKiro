@@ -40,11 +40,12 @@ hooks:
 test *args:
     uv run pytest --cov "$@"
 
-# Live tests against your real kiro-cli login (spends a few credits; KIRO_LIVE_MODEL picks the model)
+# Live tests against your real kiro-cli login, 6 in parallel (spends a few credits; KIRO_LIVE_MODEL picks the model;
+# pass -n 0 to run them one by one)
 [group('test')]
 [positional-arguments]
 test-live *args:
-    KIRO_LIVE_TESTS=1 uv run pytest tests/live "$@"
+    KIRO_LIVE_TESTS=1 uv run pytest tests/live -n 6 "$@"
 
 # Commit with a conventional-commit message, interactively
 [group('release')]

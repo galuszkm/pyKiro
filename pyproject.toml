@@ -9,9 +9,9 @@ authors = [
     { name = "Michal Galuszka", email = "michal.galuszka1@gmail.com" },
 ]
 keywords = ["kiro", "agent", "acp", "agent-client-protocol", "mcp", "llm", "ai"]
-requires-python = ">=3.11,<3.15"
+requires-python = ">=3.11,<3.16"
 dependencies = [
-    "agent-client-protocol>=0.12.1,<0.13",
+    "agent-client-protocol>=1.0.0,<2",
     "pydantic>=2.14,<3",
 ]
 classifiers = [
@@ -22,6 +22,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Framework :: AsyncIO",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
     "Topic :: Software Development :: Libraries",
@@ -46,6 +47,7 @@ dev = [
     "pytest>=9",
     "pytest-cov>=7.1.0",
     "pytest-timeout>=2.4",
+    "pytest-xdist>=3.8",
     "ruff>=0.17.2",
     "rust-just>=1.59.0",
     "ty>=0.0.91",

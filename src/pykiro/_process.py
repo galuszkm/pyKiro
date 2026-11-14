@@ -73,10 +73,6 @@ class StderrBuffer:
         """The last ``n`` lines; nothing for ``n <= 0``."""
         return "".join(list(self.lines)[-n:]) if n > 0 else ""
 
-    def contains(self, text: str) -> bool:
-        """Whether any buffered line contains ``text`` (case-insensitive)."""
-        return any(text.lower() in line.lower() for line in self.lines)
-
     async def pump(self, stream: asyncio.StreamReader) -> None:
         """Read ``stream`` until EOF."""
         while line := await stream.readline():
@@ -85,22 +81,11 @@ class StderrBuffer:
             logger.debug("kiro-cli stderr: %s", text.rstrip())
 
 
-def startup_error(exit_code: int | None, stderr: StderrBuffer) -> KiroProcessError:
-    """Explain a process that exited before answering initialize."""
-    if stderr.contains("you are not logged in"):
-        return KiroProcessError(
-            "Not logged in to Kiro: run `kiro-cli login` (or `kiro-cli login --use-device-flow`), or set KIRO_API_KEY."
-        )
-    return KiroProcessError(
-        "kiro-cli exited before answering initialize", exit_code=exit_code, stderr_tail=stderr.tail()
-    )
-
-
 async def spawn(argv: Sequence[str], env: Mapping[str, str], cwd: str) -> asyncio.subprocess.Process:
     """Start the agent in its own process group (POSIX session, Windows process group).
 
-    On POSIX, signalling the group stops kiro-cli and kiro-cli-chat; the Node.js engine runs in its own group and
-    exits on its own once they are gone (observed on kiro-cli 2.34.0).
+    On POSIX, signalling the group stops kiro-cli; the Node.js engine runs in its own group and exits on its own
+    once kiro-cli is gone (observed on kiro-cli 3.3.0).
     """
     group: dict[str, Any]
     if sys.platform == "win32":

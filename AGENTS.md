@@ -6,7 +6,7 @@ an async API (blocking callers use `asyncio.run`, or `ask_sync` for one question
 library itself). The live tests (`tests/live/`) record the verified facts about Kiro: each fact the library relies
 on has a direct assertion, and related facts may share one focused scenario to save credits.
 
-**Stack:** Python 3.11–3.14 · `agent-client-protocol` (JSON-RPC layer only) · `pydantic` v2 · uv · ruff · ty ·
+**Stack:** Python 3.11–3.15 · `agent-client-protocol` (JSON-RPC layer only) · `pydantic` v2 · uv · ruff · ty ·
 bandit · pytest (+ anyio plugin, hypothesis) · just · pre-commit · commitizen. Documentation is `docs/`: a `README.md`
 index and numbered Markdown chapters (`NN_Title.md`); each example chapter has one full program (a few add a second
 file). There are no example `.py` files; ruff formats the Python blocks in `docs/*.md` (`just check`).

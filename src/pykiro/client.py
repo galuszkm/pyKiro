@@ -17,9 +17,9 @@ from typing import Any, ParamSpec, Self, TypeVar
 from pydantic import BaseModel
 
 from . import _process
-from ._acp import PROTOCOL_VERSION, Rpc, _validate_initialize, method_not_found
+from ._acp import AUTH_REQUIRED, PROTOCOL_VERSION, Rpc, _validate_initialize, method_not_found
 from .content import PromptContent
-from .errors import KiroError, KiroProcessError
+from .errors import KiroError, KiroProcessError, KiroProtocolError
 from .events import Event, TurnResult
 from .permissions import CANCELLED, PermissionPolicy
 from .profile import Isolated, Profile, ProfileHome, agent_definition
@@ -174,7 +174,11 @@ class KiroClient:
                 ),
                 self._startup_timeout,
             )
-            _validate_initialize(result)
+            try:
+                _validate_initialize(result)
+            except KiroError:
+                await self._raise_if_signed_out()
+                raise
         except TimeoutError:
             await self._teardown()
             raise KiroProcessError("kiro-cli did not answer initialize", stderr_tail=self._stderr.tail()) from None
@@ -183,6 +187,20 @@ class KiroClient:
             raise
         self._state = "running"
         return self
+
+    async def _raise_if_signed_out(self) -> None:
+        """Raise the login error if Kiro answers with ACP's auth_required error.
+
+        Signed out, kiro-cli still answers initialize, but without capabilities, and refuses every other request.
+        """
+        try:
+            await self._request("session/list", {})
+        except KiroProtocolError as exc:
+            if exc.code == AUTH_REQUIRED:
+                raise KiroProcessError(
+                    "Not logged in to Kiro: run `kiro-cli login` (or `kiro-cli login --use-device-flow`), "
+                    "or set KIRO_API_KEY."
+                ) from None
 
     async def close(self) -> None:
         """Cancel running turns, stop kiro-cli and clean up. Safe to call more than once and concurrently.
@@ -217,10 +235,10 @@ class KiroClient:
 
     async def _teardown(self) -> None:
         await self._tool_server.stop()
+        if self._rpc is not None:  # before stdin closes: the SDK may still be writing ($/cancel_request)
+            await self._rpc.close()
         if self._proc is not None:
             self.exit_code = await _process.shutdown(self._proc)
-        if self._rpc is not None:
-            await self._rpc.close()
         if self._stderr_task is not None:
             try:
                 await asyncio.wait_for(self._stderr_task, 2)
@@ -254,10 +272,9 @@ class KiroClient:
             await asyncio.wait_for(self._proc.wait(), 2)
         with contextlib.suppress(TimeoutError):
             await asyncio.wait_for(asyncio.shield(self._stderr_task), 1)
-        if self._state == "starting":
-            return _process.startup_error(self._proc.returncode, self._stderr)
+        when = "before answering initialize" if self._state == "starting" else "unexpectedly"
         return KiroProcessError(
-            "kiro-cli exited unexpectedly", exit_code=self._proc.returncode, stderr_tail=self._stderr.tail()
+            f"kiro-cli exited {when}", exit_code=self._proc.returncode, stderr_tail=self._stderr.tail()
         )
 
     async def _handle(self, method: str, params: dict[str, Any], is_notification: bool) -> Any:
@@ -363,6 +380,7 @@ class KiroClient:
                 has app tools or a ``result_type``, the name ``app`` is reserved.
 
         Raises:
+            KiroError: ``model`` or ``effort`` is set and Kiro listed no models within 30 s.
             ValueError: Invalid cwd, mode, model or effort, or an MCP server named ``app``.
         """
         self._check_open()
@@ -394,6 +412,8 @@ class KiroClient:
             # Kiro silently falls back to its default agent when a mode is unknown or a profile fails to load.
             if mode is not None and session.mode != mode:
                 raise ValueError(f"Kiro did not activate mode {mode!r} (session is in {session.mode!r})")
+            if model is not None or effort is not None:
+                await session._wait_for_models()
             if model is not None:
                 await session._set_option("model", model)
             if effort is not None:
@@ -432,6 +452,7 @@ class KiroClient:
         and the session is also listed under it, but the agent's earlier context names the original directory.
 
         Raises:
+            KiroError: ``model`` or ``effort`` is set and Kiro listed no models within 30 s.
             ValueError: No stored session with that id, or it is already open or being loaded; an invalid cwd,
                 model or effort, or an MCP server named ``app``.
         """
@@ -542,8 +563,8 @@ async def ask(
             ``AnsiRenderer()``. For async handling, use a KiroClient and iterate ``Session.stream()``.
 
     Raises:
-        KiroError: Kiro did not negotiate the required ACP contract, the client closed, or a structured result was
-            expected but not submitted.
+        KiroError: Kiro did not negotiate the required ACP contract, listed no models within 30 s, the client
+            closed, or a structured result was expected but not submitted.
         KiroProcessError: kiro-cli was not found, the user is not logged in, or kiro-cli exited or did not
             answer in time.
         ValueError: Invalid cwd, model or effort.

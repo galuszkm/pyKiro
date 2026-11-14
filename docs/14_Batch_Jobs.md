@@ -190,8 +190,8 @@ async with session:
 ```
 
 `result_type=Triage` is [chapter 06](06_Structured_Output.md) again: `Literal` fields mean the agent can only pick
-from fixed choices. `async with session` closes the session as soon as the item is done, which matters: observed on
-kiro-cli 2.34.0, every open session makes creating the next one slower.
+from fixed choices. `async with session` closes the session as soon as the item is done, so a long batch doesn't
+pile up hundreds of open sessions in Kiro.
 
 The `try` catches `KiroError`, turns it into a `failed` row, and *keeps going*. One bad comment must not throw away
 the other five hundred. A `ValueError` from a typo in the model name is a bug in your setup, so we let that one crash
@@ -219,7 +219,7 @@ serialization described below.
 
 ## Gotchas, side effects and risks
 
-- **Keep these sessions plain.** Observed on kiro-cli 2.34.0: sessions with agent settings (`system`, `kiro_tools`,
+- **Keep these sessions plain.** Observed on kiro-cli 3.3.0: sessions with agent settings (`system`, `kiro_tools`,
   `allow`, `deny`) run their turns one after another, so a batch of them loses its parallel speed.
 - **Nothing is saved until the end.** For a long job, write each row as it finishes, and skip rows you already have
   on the next run.

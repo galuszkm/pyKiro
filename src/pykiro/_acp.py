@@ -8,6 +8,7 @@ strips unknown fields, and Kiro extends ACP through exactly those. So handlers g
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 from collections.abc import Awaitable, Callable, Mapping
 from typing import Any
@@ -19,6 +20,7 @@ from .errors import KiroError, KiroProtocolError
 
 # ACP v1: the session/prompt response ends the turn, which Session.stream() relies on.
 PROTOCOL_VERSION = 1
+AUTH_REQUIRED = -32000  # ACP's error code for a request the agent refuses until the user logs in
 
 _REQUIRED_FLAGS = (
     ("loadSession",),
@@ -126,4 +128,5 @@ class Rpc:
 
     async def close(self) -> None:
         """Stop the receive loop and in-flight handlers."""
-        await self._conn.close()
+        with contextlib.suppress(OSError):  # the SDK re-raises a write that failed because the process is gone
+            await self._conn.close()

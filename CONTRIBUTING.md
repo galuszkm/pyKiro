@@ -5,7 +5,7 @@ we can agree on the approach first.
 
 ## Development environment
 
-You need Python 3.11–3.14, [uv](https://docs.astral.sh/uv/) and git. For the live tests and for running the code in
+You need Python 3.11–3.15, [uv](https://docs.astral.sh/uv/) and git. For the live tests and for running the code in
 `docs/` you also need [kiro-cli](https://kiro.dev/docs/getting-started/installation) with the V3 engine, logged in
 (`kiro-cli login`).
 
@@ -27,7 +27,9 @@ uv run just test-live -k <name> # against your real kiro-cli; spends a few credi
 
 Live tests pin the facts about Kiro that the library relies on: each fact has a direct assertion, and related facts
 may share one focused scenario to save credits. They use a cheap model (`KIRO_LIVE_MODEL`, default
-`claude-haiku-5.5`); run only the ones your change needs.
+`claude-haiku-5.5`); run only the ones your change needs. CI runs all of them against the latest kiro-cli
+(`.github/workflows/live.yml`, with the repository's `KIRO_API_KEY` secret) on pull requests into `main` and pushes
+to `main`; pull requests from forks skip them.
 
 The coding standards (principles, conventions, what not to do) are in [AGENTS.md](AGENTS.md) and the skills under
 `.kiro/skills/`.

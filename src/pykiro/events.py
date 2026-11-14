@@ -42,7 +42,6 @@ class ToolCall(Event):
     text: str = ""
     raw_input: Any = None
     raw_output: Any = None
-    failure_reason: str | None = None  # Kiro's reason when it gives one, e.g. "denied"
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -128,7 +127,6 @@ def _normalize(kind: str | None, update: Mapping[str, Any], kiro: Mapping[str, A
             text=_tool_text(content),
             raw_input=update.get("rawInput"),
             raw_output=update.get("rawOutput"),
-            failure_reason=_optional_str(kiro.get("failureReason")),
             **common,
         )
     chunk = _mapping(content).get("text") if kind in ("agent_thought_chunk", "user_message_chunk") else None

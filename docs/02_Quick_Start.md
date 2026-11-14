@@ -67,7 +67,7 @@ Credits spent: 0.0097
 ### Setting things up (once)
 
 **1. Install Kiro CLI.** Follow [Kiro's installation guide](https://kiro.dev/docs/getting-started/installation/#cli).
-pyKiro is tested with **kiro-cli 2.37.0**. Check yours with `kiro-cli --version`, and pyKiro's with
+pyKiro is tested with **kiro-cli 3.3.0**. Check yours with `kiro-cli --version`, and pyKiro's with
 `pykiro.__version__`.
 
 **2. Log in.** Run `kiro-cli login` and follow the browser prompts. No browser on that machine? Use
@@ -75,7 +75,7 @@ pyKiro is tested with **kiro-cli 2.37.0**. Check yours with `kiro-cli --version`
 [headless mode](https://kiro.dev/docs/cli/headless/) uses an API key instead ([chapter 15](15_CI_CD.md)). pyKiro
 itself never needs a key: it uses whatever login Kiro CLI has, and it never reads your credentials.
 
-**3. Install pyKiro.** You need Python 3.11–3.14. One command installs it straight from GitHub:
+**3. Install pyKiro.** You need Python 3.11–3.15. One command installs it straight from GitHub:
 
 ```bash
 pip install git+https://github.com/galuszkm/pyKiro
@@ -135,7 +135,7 @@ you're most likely to see first:
 | `exited before answering initialize`, with `invalid value 'v3'` in the stderr lines | Your `kiro-cli` is too old. Update it. `which -a kiro-cli` shows an old copy hiding on your PATH. |
 | `Kiro does not advertise required ACP capabilities` | Update `kiro-cli`; this version doesn't provide the V3 contract pyKiro uses. |
 | `ValueError: '...' is not a value of 'model'` | Your account doesn't offer that model. Pick one from the list in the message. |
-| `ValueError: option 'model' is not advertised` | Kiro had not listed its models yet, right after starting (observed on kiro-cli 2.34.0). Run it again. |
+| `KiroError: Kiro listed no models within 30 s ...` | Kiro couldn't load its list of models. Check your network, and that `KIRO_API_KEY` is unset or valid: it takes priority over your login. |
 | It just waits | Put a deadline around the turn ([chapter 04](04_Streaming_Events.md)). |
 
 Still stuck? Turn on pyKiro's logs before you start Kiro. They show what `kiro-cli` writes to stderr, as it arrives.

@@ -9,7 +9,7 @@ and the gotchas.
 
 ## Before you start
 
-- **What you need:** Python 3.11–3.14, [Kiro CLI](https://kiro.dev/docs/getting-started/installation) with the
+- **What you need:** Python 3.11–3.15, [Kiro CLI](https://kiro.dev/docs/getting-started/installation) with the
   V3 engine, and a Kiro login. [Chapter 02](02_Quick_Start.md) walks you through the setup.
 - **Running a chapter's code:** install pyKiro with `pip install git+https://github.com/galuszkm/pyKiro`, save the
   program from "The full code" under the name the chapter gives, then run it with `python name.py` (or
@@ -20,7 +20,7 @@ and the gotchas.
   makes the *setup* repeatable, not the model's words.
 - **Models depend on your account.** If `claude-haiku-5.5` isn't on your list, pick another one
   ([chapter 05](05_Models_and_Credits.md)).
-- **Where it was tested:** Linux, Python 3.13, kiro-cli 2.37.0. Kiro can change between versions, so when a chapter
+- **Where it was tested:** Linux, Python 3.13, kiro-cli 3.3.0. Kiro can change between versions, so when a chapter
   describes something Kiro does that pyKiro can't promise, it says which kiro-cli version it was observed on.
 - **Clean by default:** unless a chapter says otherwise, the agent works in an empty temporary folder with a clean,
   isolated Kiro configuration, so it doesn't touch your projects or your own `~/.kiro`.

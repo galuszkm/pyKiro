@@ -117,7 +117,7 @@ def test_terminal_control_characters_in_event_text_are_not_written():
     render(notice("agent_thought_chunk", dirty))
     render(text(dirty + "\n\tz"))
     render(ToolCall(session_id="s", tool_call_id="t1", title=dirty + "\nforged line", status="pending"))
-    render(ToolCall(session_id="s", tool_call_id="t1", status="failed", failure_reason=dirty))
+    render(ToolCall(session_id="s", tool_call_id="t1", status="failed", text=dirty))
     render(TurnResult(session_id="s", stop_reason=dirty))
     written = out.getvalue()
 
