@@ -69,6 +69,28 @@ async def _run(tmp_path, hold_until: float | None):
 
 
 async def test_probe(tmp_path):
-    runs = [await _run(tmp_path, None) for _ in range(6)]
-    summary = [(r["model_in_session_new"], r["session_new"] - r["started"], r["model_listed_at"]) for r in runs]
-    pytest.fail("PROBE direct x6 (model_in_session_new, session/new secs after start, listed_at): " + repr(summary), pytrace=False)
+    import os
+    from pathlib import Path
+
+    def holders() -> list[str]:
+        found = []
+        for root in (Path.home() / ".kiro", Path.home() / ".local", Path.home() / ".cache", Path.home() / ".config"):
+            for dirpath, _dirs, files in os.walk(root):
+                for name in files:
+                    path = Path(dirpath) / name
+                    try:
+                        if path.stat().st_size < 50_000_000 and b"claude-haiku-5.5" in path.read_bytes():
+                            found.append(str(path.relative_to(Path.home())))
+                    except OSError:
+                        pass
+        return found
+
+    before = holders()
+    first = await _run(tmp_path, None)
+    after_first = holders()
+    second = await _run(tmp_path, None)
+    pytest.fail(
+        f"PROBE before={before} first_has_model={first['model_in_session_new']} "
+        f"after_first={after_first} second_has_model={second['model_in_session_new']}",
+        pytrace=False,
+    )
