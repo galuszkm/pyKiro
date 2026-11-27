@@ -320,9 +320,10 @@ async def test_model_effort_image_and_resource(model, tmp_path):
     assert "MANGO-42" in password.text.upper()
 
 
-async def test_a_model_list_that_arrives_after_session_new_is_waited_for(model, effort, tmp_path, caplog):
-    # A proxy holds the connections Kiro opens in its first seconds, so its model list arrives late: Kiro answers
-    # session/new without a model option (after waiting about 10 s) and sends it in a config_option_update later.
+async def test_model_and_effort_are_set_when_kiro_lists_its_models_late(model, effort, tmp_path):
+    # A proxy holds the connections Kiro opens in its first seconds, so its model list is slow. Whether session/new
+    # already has the model option or Kiro sends it in a config_option_update a moment later is a race (kiro-cli
+    # 3.6.2), and either way the session ends up with the requested model and effort.
     opened = time.monotonic()
 
     async def relay(reader: asyncio.StreamReader, writer: asyncio.StreamWriter) -> None:
@@ -346,13 +347,9 @@ async def test_a_model_list_that_arrives_after_session_new_is_waited_for(model, 
 
     proxy = await asyncio.start_server(tunnel, "127.0.0.1", 0)
     url = f"http://127.0.0.1:{proxy.sockets[0].getsockname()[1]}"
-    with caplog.at_level(logging.DEBUG, logger="pykiro.wire"):
-        async with proxy, KiroClient(cwd=tmp_path, env={"HTTPS_PROXY": url, "https_proxy": url}) as client:
-            session = await client.new_session(model=model, effort=effort)
-    received = [r.args[1] for r in caplog.records if r.name == "pykiro.wire" and r.args and r.args[0] == "<--"]
-    created = next(m["result"] for m in received if "sessionId" in (m.get("result") or {}))
+    async with proxy, KiroClient(cwd=tmp_path, env={"HTTPS_PROXY": url, "https_proxy": url}) as client:
+        session = await client.new_session(model=model, effort=effort)
 
-    assert "model" not in [o["id"] for o in created["configOptions"]]  # Kiro's list wasn't there yet
     assert session.model == model
     assert session.effort == effort
 
