@@ -69,9 +69,6 @@ async def _run(tmp_path, hold_until: float | None):
 
 
 async def test_probe(tmp_path):
-    out = {
-        "direct": await _run(tmp_path, None),
-        "hold_12s": await _run(tmp_path, 12),
-        "hold_25s": await _run(tmp_path, 25),
-    }
-    pytest.fail("PROBE " + repr(out), pytrace=False)
+    runs = [await _run(tmp_path, None) for _ in range(6)]
+    summary = [(r["model_in_session_new"], r["session_new"] - r["started"], r["model_listed_at"]) for r in runs]
+    pytest.fail("PROBE direct x6 (model_in_session_new, session/new secs after start, listed_at): " + repr(summary), pytrace=False)
