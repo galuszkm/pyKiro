@@ -92,7 +92,7 @@ an offline one:
 - Permissions reach the policy with Kiro's consent context; the app's own tools are self-approved; a cancel answers
   a pending ask `cancelled` without waiting for the policy, and its late allow is not used.
 - Start-up: a signed-out kiro-cli (a throwaway HOME without its credentials, no credits) is the login error; a
-  model list that arrives after `session/new` (a local proxy delays Kiro's first connections) is waited for.
+  model and effort are set when the model list is slow (a local proxy delays Kiro's first connections).
 - Lifecycle: close stops the process group quickly, is shared by concurrent callers and finishes when a caller is
   cancelled, a crash mid-turn fails the turn, close cancels running turns.
 - Load with history in a new process, one load of an id at a time; agent settings (system prompt, allow/deny);
@@ -116,7 +116,8 @@ an offline one:
 - Live tests run on 6 workers (`just test-live` passes `-n 6` to pytest-xdist; `-n 0` runs them one by one). A live
   test owns its client, cwd (`tmp_path`) and files and shares nothing with another test. Starting Kiro is most of a
   live test's time: related facts share one client, with a session each, and run their turns concurrently
-  (`asyncio.gather`) rather than starting Kiro again.
+  (`asyncio.gather`) rather than starting Kiro again. `tests/live/conftest.py` starts kiro-cli once before the
+  workers do: kiro-cli unpacks its engine on its first start, and several first starts at once can fail (3.6.2).
 - Live tests: the `model` and `effort` fixtures (`KIRO_LIVE_MODEL`, default `claude-haiku-5.5`; `KIRO_LIVE_EFFORT`,
   default `low`) on every session that sets a model, tiny prompts, an isolated
   profile unless the fact is about `Inherit()`. They may list file names under `~/.kiro` but never read Kiro's

@@ -95,7 +95,7 @@ public API:  __init__.py
   `SessionInfo.from_raw` leave out entries without a string id, so they never raise. Unknown kinds become `Notice`
   events; every event keeps its `raw` payload. No Pydantic models or enums for Kiro's messages.
 - **Launch the way Kiro documents for ACP clients:** `kiro-cli acp --agent-engine=v3 --auth-method=cli`. `cli`
-  (the default, per `kiro-cli acp --help` on 3.3.0) takes the engine's tokens from kiro-cli's own credential store; `client` would
+  (the default, per `kiro-cli acp --help` on 3.6.2) takes the engine's tokens from kiro-cli's own credential store; `client` would
   send the engine's token requests to us, and we answer those -32601.
 - **Never invent permission options**; answer with an offered option id, falling back to `reject_once`, then
   `cancelled`.
@@ -103,9 +103,11 @@ public API:  __init__.py
   with JSON-RPC -32603 ("This operation was aborted") instead of a `cancelled` stop reason; `stream()` reports a
   turn it cancelled as `cancelled` either way (live test `test_closing_the_client_cancels_running_turns`).
 - **Validate config values against what the session advertises** (`Session._set_option`, at session creation) —
-  Kiro doesn't. Kiro answers `session/new` (after waiting about 10 s) without a `model` option when its model list
-  hasn't loaded, and sends the option later in a `config_option_update`; with `model=` or `effort=` the session
-  waits for it, up to `MODEL_LIST_TIMEOUT` (live test `test_a_model_list_that_arrives_after_session_new_is_waited_for`).
+  Kiro doesn't. Kiro answers `session/new` without a `model` option when its model list hasn't loaded yet, and
+  sends the option a moment later in a `config_option_update` (on 3.6.2 this is a race: it happens on some starts
+  and not others); with `model=` or `effort=` the session waits for it, up to `MODEL_LIST_TIMEOUT` (live test
+  `test_model_and_effort_are_set_when_kiro_lists_its_models_late`). On 3.6.2, `initialize` itself waits for a slow
+  network, so `startup_timeout` also covers that wait.
 - **The process runs in its own process group**, and escalation signals the group. Signalling the group stops
   kiro-cli; the Node.js engine (`acp-server.js`) runs in its own group and exits on its own once kiro-cli is gone
   (at once, measured on kiro-cli 3.3.0). `close()` gives kiro-cli one second to exit, then
